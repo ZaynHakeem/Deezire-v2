@@ -1,0 +1,6 @@
+{
+  "name": "Deezire",
+  "description": "A mood-based music discovery web app that translates emotional states into curated Deezer music recommendations using on-device emotion detection.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
