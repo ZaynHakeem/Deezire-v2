@@ -128,8 +128,22 @@ export function Home() {
     return () => clearInterval(timer);
   }, [cooldownUntil]);
   useEffect(() => {
-    if (!searchResult && !lastQuery && !isSearchingRef.current)
-      setLocalStep("input");
+    if (searchResult || lastQuery) return;
+    ++searchGenerationRef.current;
+    ++analysisGenerationRef.current;
+    isSearchingRef.current = false;
+    setIsRefreshing(false);
+    setAnalyzing(false);
+    setLocalStep("input");
+    setRawText("");
+    setSelectedMood(null);
+    setDetectedEmotion(null);
+    setChosenMode(null);
+    setAnalyzedQuery(null);
+    setAnalyzedLabel(null);
+    setErrorMessage("");
+    setRefreshError(null);
+    setInputError("");
   }, [searchResult, lastQuery]);
   useEffect(() => {
     document.documentElement.style.setProperty(

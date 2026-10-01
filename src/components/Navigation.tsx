@@ -13,7 +13,7 @@ const items = [
 ];
 export function Navigation() {
   const { session, signOut, authLoading } = useAuth();
-  const { likedSongs, triggerToast } = useApp();
+  const { likedSongs, triggerToast, resetSession } = useApp();
   const confirm = useConfirm();
   const navigate = useNavigate();
   const [signingOut, setSigningOut] = useState(false);
@@ -48,7 +48,22 @@ export function Navigation() {
     <>
       <header className="site-header">
         <div className="header-inner">
-          <Link className="brand" to="/" aria-label="Deezire home">
+          <Link
+            className="brand"
+            to="/"
+            aria-label="Deezire home"
+            onClick={(event) => {
+              if (
+                event.button !== 0 ||
+                event.metaKey ||
+                event.ctrlKey ||
+                event.shiftKey ||
+                event.altKey
+              )
+                return;
+              resetSession();
+            }}
+          >
             <CustomLogo size={36} />
             <span>
               deezire<span className="brand-period">.</span>

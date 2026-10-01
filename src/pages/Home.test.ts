@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { act, createElement } from "react";
+import { act, createElement, Fragment } from "react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { Home } from "./Home";
+import { Navigation } from "../components/Navigation";
 import { getMoodSongs, DeezerNetworkError } from "../services/deezer";
 import { preloadEmotionModel } from "../services/emotionClassifier";
 import {
@@ -155,6 +156,51 @@ it("ignores an old response after canceling and starting a new mood search", asy
   );
   expect(screen.app.searchResult?.tracks[0].id).toBe(9);
   expect(screen.app.searchResult?.mood).toBe("Happy");
+});
+it("returns to an empty home screen when the wordmark is tapped", async () => {
+  let resolveLate: (value: {
+    tracks: ReturnType<typeof sampleTrack>[];
+    queryUsed: string;
+  }) => void = () => {};
+  vi.mocked(getMoodSongs)
+    .mockResolvedValueOnce({
+      tracks: [sampleTrack(1)],
+      queryUsed: "calm",
+    })
+    .mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveLate = resolve;
+      }),
+    );
+  screen = await mount(
+    createElement(
+      Fragment,
+      null,
+      createElement(Navigation),
+      createElement(Home),
+    ),
+  );
+  await choose("Peaceful");
+  await click(screen.host.querySelector(".direction-feel")!);
+  expect(screen.host.querySelectorAll(".track-row")).toHaveLength(1);
+  await click(screen.host.querySelector('[aria-label="Deezire home"]')!);
+  expect(screen.host.querySelector("h1")!.textContent).toContain("Every feeling");
+  expect(screen.host.querySelector("textarea")!.value).toBe("");
+  expect(screen.app.searchResult).toBeNull();
+  expect(screen.app.lastQuery).toBeNull();
+  expect(localStorage.getItem("deezire_last_result")).toBeNull();
+  expect(localStorage.getItem("deezire_last_query")).toBeNull();
+  await nextCooldown();
+  await choose("Happy");
+  await click(screen.host.querySelector(".direction-feel")!);
+  expect(screen.host.querySelector(".loading-screen")).not.toBeNull();
+  await click(screen.host.querySelector('[aria-label="Deezire home"]')!);
+  expect(screen.host.querySelector("textarea")).not.toBeNull();
+  await act(async () =>
+    resolveLate({ tracks: [sampleTrack(4)], queryUsed: "late" }),
+  );
+  expect(screen.app.searchResult).toBeNull();
+  expect(screen.host.querySelector(".track-row")).toBeNull();
 });
 it("provides a full error screen with retry and type-again paths for an initial failure", async () => {
   vi.mocked(getMoodSongs).mockRejectedValueOnce(
