@@ -64,10 +64,8 @@ export function Navigation() {
               resetSession();
             }}
           >
-            <CustomLogo size={36} />
-            <span>
-              deezire<span className="brand-period">.</span>
-            </span>
+            <CustomLogo size={42} tone="light" />
+            <img className="brand-word" src="/brand/wordmark.png" alt="" />
           </Link>
           <nav
             className="desktop-navigation"

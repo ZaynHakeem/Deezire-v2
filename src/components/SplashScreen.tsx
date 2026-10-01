@@ -29,8 +29,8 @@ export function SplashScreen({
       transition={{ duration: reduced ? 0 : 0.2 }}
     >
       <div className="splash-orbit" aria-hidden="true" />
-      <CustomLogo size={72} animate={!reduced} />
-      <span className="splash-wordmark">deezire.</span>
+      <CustomLogo size={84} tone="light" animate={!reduced} />
+      <img className="splash-wordmark" src="/brand/wordmark.png" alt="" />
       <p>Make room for a feeling.</p>
       <span className="eyebrow splash-foot">YOUR MOOD. YOUR MUSIC.</span>
     </motion.div>

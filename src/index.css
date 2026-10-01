@@ -296,7 +296,10 @@ main {
   color: #d1a6ff;
 }
 .custom-logo {
-  color: #c697ff;
+  display: block;
+  height: var(--logo-size, 32px);
+  width: auto;
+  max-width: none;
   flex-shrink: 0;
 }
 .status-dot {
@@ -363,14 +366,13 @@ main {
   min-height: 44px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: var(--display);
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: -1.5px;
+  gap: 10px;
 }
-.brand-period {
-  color: #c08aff;
+.brand-word {
+  display: block;
+  height: 29px;
+  width: auto;
+  max-width: none;
 }
 .desktop-navigation {
   display: none;
@@ -568,9 +570,14 @@ main {
     border-color 0.2s,
     background 0.2s;
 }
-.mood-chip > span {
-  font-size: 17px;
-  line-height: 1;
+.mood-mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mark-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mark-color) 22%, transparent);
+  flex-shrink: 0;
+  display: inline-block;
 }
 .mood-chip > svg {
   margin-left: auto;
@@ -795,11 +802,10 @@ main {
 .mood-status {
   margin-bottom: 19px;
   color: var(--mood-color);
-}
-.mood-status > span {
-  display: inline-block;
-  margin-right: 7px;
-  font-size: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .choosing-screen h1 {
   font-size: 43px;
@@ -976,9 +982,6 @@ main {
     ),
     radial-gradient(var(--mood-soft), #111);
   box-shadow: 0 0 60px color-mix(in srgb, var(--mood-color) 12%, transparent);
-}
-.loading-record .custom-logo {
-  color: var(--mood-color);
 }
 .loading-progress {
   width: 220px;
@@ -1727,9 +1730,6 @@ main {
   font-size: 12px;
   color: #cdbdd9;
 }
-.about-moods > div > span > span {
-  font-size: 16px;
-}
 .faq-section {
   margin-top: 42px;
 }
@@ -2200,10 +2200,11 @@ dialog::backdrop {
   position: relative;
 }
 .splash-wordmark {
-  font-family: var(--display);
-  font-size: 44px;
-  letter-spacing: -3px;
-  margin-top: 16px;
+  display: block;
+  height: 46px;
+  width: auto;
+  max-width: none;
+  margin-top: 18px;
   position: relative;
 }
 .splash-screen > p {
@@ -2772,9 +2773,6 @@ dialog::backdrop {
     padding: 10px;
     gap: 7px;
   }
-  .mood-chip > span {
-    font-size: 16px;
-  }
   .mood-picker {
     margin-top: 25px;
   }
@@ -2937,11 +2935,13 @@ dialog::backdrop {
     padding-inline: 17px;
   }
   .brand {
-    font-size: 23px;
-    gap: 4px;
+    gap: 8px;
   }
   .brand > .custom-logo {
-    width: 30px;
+    height: 34px;
+  }
+  .brand-word {
+    height: 24px;
   }
   .account-navigation {
     gap: 9px;

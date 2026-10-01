@@ -32,10 +32,10 @@ import {
   connectionAllowsPreload,
   isModelReady,
 } from "../services/emotionClassifier";
-import { MOOD_THEMES } from "../utils/themes";
 import { MOODS, MOOD_PRESENTATION } from "../config/moodPresentation";
 import { MoodType, ModeType } from "../types";
 import { MoodArtwork } from "../components/MoodArtwork";
+import { MoodMark } from "../components/MoodMark";
 import { TrackList } from "../components/TrackList";
 import { AlbumArt } from "../components/AlbumArt";
 import { CustomLogo } from "../components/CustomLogo";
@@ -465,9 +465,7 @@ export function Home() {
                         }
                         onClick={() => handleChipClick(mood)}
                       >
-                        <span aria-hidden="true">
-                          {MOOD_THEMES[mood].emoji}
-                        </span>
+                        <MoodMark mood={mood} />
                         {mood}
                         <ArrowUpRight size={13} />
                       </button>
@@ -548,7 +546,7 @@ export function Home() {
         {localStep === "choosing" && selectedMood && (
           <motion.section key="choosing" {...enter} className="choosing-screen">
             <p className="eyebrow mood-status" aria-live="polite">
-              <span aria-hidden="true">{MOOD_THEMES[selectedMood].emoji}</span>
+              <MoodMark mood={selectedMood} />
               {rawText
                 ? `WE PICKED UP ${detectedEmotion || selectedMood}`
                 : `${selectedMood.toUpperCase()} — ${MOOD_PRESENTATION[selectedMood].caption}`}

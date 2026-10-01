@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useConfirm } from "../context/ConfirmContext";
 import { MOODS } from "../config/moodPresentation";
-import { MOOD_THEMES } from "../utils/themes";
+import { MoodMark } from "../components/MoodMark";
 
 export function About() {
   const { resetSession, searchResult, lastQuery, triggerToast } = useApp();
@@ -92,7 +92,7 @@ export function About() {
         <div>
           {MOODS.map((mood) => (
             <span key={mood}>
-              <span aria-hidden="true">{MOOD_THEMES[mood].emoji}</span>
+              <MoodMark mood={mood} />
               {mood}
             </span>
           ))}
