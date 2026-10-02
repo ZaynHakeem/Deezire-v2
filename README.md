@@ -45,34 +45,24 @@ Music requests still go through `/api/deezer`. `vite.config.ts` preserves the de
 
 Recent mood text, query, and mix are stored in this browser using the existing guards. Music searches send translated search terms to Deezer; unrecognized wording may be included. The About page explains this to users.
 
-## Auth: explicitly a development stub
+## Auth
 
-Default configuration needs no environment variables or API keys.
+Without Supabase environment variables, accounts stay in a local demo. That demo stores passwords in plain text in this browser. Do not use a real password with it.
 
-**Use a made-up password. This is not secure authentication.** The local provider stores demo passwords in plain text in browser storage so the prototype can check later sign-ins. There is no hashing, encryption, email verification, password reset, server authorization, or cloud synchronization. The UI says it is a local demo and asks users not to use a real password. Do not treat it as a production account system.
+Set these public values to use Supabase Auth. They are not secret keys. Never put the service role key in `VITE_*` variables.
 
-All auth operations go through `src/services/auth.ts`: `signUp`, `signIn`, `signOut`, and `getSession`. `AppProvider` composes `AuthProvider` and the existing app state. Every original `useApp()` member remains available.
+```dotenv
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
 
-Guest likes keep the original `deezire_liked_songs` key. Accounts use `deezire_liked_songs:user:<id>`. Signing in does not migrate or erase guest likes. Signing out restores the guest collection; returning to an account restores that account’s collection. Undo state cannot carry a removed song into another account.
+Signup passwords must be 8–20 characters and include an uppercase letter, a lowercase letter, a number, and a symbol. In the Supabase dashboard, set the same minimum length under Authentication, and turn on email confirmation if you want new accounts to verify before they can sign in.
 
-### Switch to a future backend
+Guest likes stay in this browser under `deezire_liked_songs`. A signed-in collection is stored in the `liked_songs` table, one row per song, tied to that user's id. Run `supabase/liked_songs.sql` in the Supabase SQL editor before liking songs while signed in. Guest likes are not moved into the account automatically. Signing out returns to the guest collection.
 
-An API provider is included behind the same interface. After implementing a server backed by Supabase Auth or MongoDB, configure these build-time values (see `.env.example`):
+An older API provider remains available when Supabase is not configured:
 
 ```dotenv
 VITE_AUTH_PROVIDER=api
 VITE_AUTH_API_URL=https://your-backend.example/api/auth
 ```
-
-The backend must implement this contract:
-
-| Method | Endpoint | Request | Success response |
-| --- | --- | --- | --- |
-| POST | `/sign-up` | `{ "email": "...", "password": "..." }` | `{ "user": { "id": "stable-id", "email": "..." } }` |
-| POST | `/sign-in` | Same credentials object | Same user object |
-| POST | `/sign-out` | No body | Any successful status |
-| GET | `/session` | No body | Same user object, or HTTP 401 when signed out |
-
-The client uses `credentials: include` and a 15-second timeout. The server owns secure HttpOnly sessions, validation, authorization, CSRF protection, and any required CORS settings. Do not place private API keys or database credentials in `VITE_*` variables. A Supabase deployment needs an adapter implementing this contract; the setting is not a direct Supabase SDK connection. Account-liked-song cloud sync is separate future backend work.
-
-Build and deploy only through your existing Vercel workflow when ready. No deployment was made during this redesign.

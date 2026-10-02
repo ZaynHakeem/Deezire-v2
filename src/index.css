@@ -571,13 +571,28 @@ main {
     background 0.2s;
 }
 .mood-mark {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--mark-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--mark-color) 22%, transparent);
+  width: 22px;
+  height: 15px;
+  overflow: hidden;
+  color: var(--mark-color);
   flex-shrink: 0;
-  display: inline-block;
+  display: block;
+}
+.mood-mark svg {
+  display: block;
+  width: 200%;
+  height: 100%;
+  animation: mood-wave-scroll var(--wave-duration, 1.6s) linear infinite;
+}
+.mood-mark rect {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: equalize var(--wave-duration, 1.6s) ease-in-out infinite alternate;
+}
+@keyframes mood-wave-scroll {
+  to {
+    transform: translateX(-50%);
+  }
 }
 .mood-chip > svg {
   margin-left: auto;
@@ -2997,6 +3012,10 @@ dialog::backdrop {
   }
   .logo-moving {
     opacity: 1;
+  }
+  .mood-mark svg,
+  .mood-mark rect {
+    animation: none !important;
   }
   .equalizer i {
     transform: none;

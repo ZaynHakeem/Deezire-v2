@@ -14,7 +14,7 @@ beforeEach(() => localStorage.clear());
 afterEach(() => vi.restoreAllMocks());
 const credentials = {
   email: "listener@example.test",
-  password: "demo-only-password",
+  password: "Demo-pass1!",
 };
 describe("local auth provider", () => {
   it("validates email and minimum password length with field-specific messages", () => {
@@ -22,7 +22,7 @@ describe("local auth provider", () => {
       validateCredentials({ email: "broken", password: "123" }, true),
     ).toEqual({
       email: expect.stringContaining("valid email"),
-      password: expect.stringContaining("8 characters"),
+      password: expect.stringContaining("8 to 20"),
     });
     expect(
       validateCredentials(
@@ -30,6 +30,24 @@ describe("local auth provider", () => {
         true,
       ).password,
     ).toContain("only spaces");
+    expect(
+      validateCredentials(
+        { email: credentials.email, password: "alllowercase1!" },
+        true,
+      ).password,
+    ).toContain("uppercase");
+    expect(
+      validateCredentials(
+        { email: credentials.email, password: "NoSymbol1A" },
+        true,
+      ).password,
+    ).toContain("symbol");
+    expect(
+      validateCredentials(
+        { email: credentials.email, password: "WayTooLongPassword12!" },
+        true,
+      ).password,
+    ).toContain("8 to 20");
   });
   it("normalizes email, persists the session, and signs in again after sign-out", async () => {
     const created = await signUp({

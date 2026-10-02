@@ -11,6 +11,8 @@ import {
   readAccountLikes,
   readLocalStorage,
 } from "../utils/accountStorage";
+import { isSupabaseAuth } from "../services/supabase";
+import { loadRemoteLikes, saveRemoteLikes } from "../services/likedSongs";
 import { Track, SearchResult, LastQueryState } from "../types";
 import {
   parseLastQuery,
@@ -182,8 +184,13 @@ function AppStateProvider({ children }: { children: React.ReactNode }) {
   queueIndexRef.current = queueIndex;
   shuffleModeRef.current = shuffleMode;
 
+  const remoteHydratedKey = useRef<string | null>(null);
+
   // Validate reads and use failure-tolerant storage helpers.
   useEffect(() => {
+    let live = true;
+    remoteHydratedKey.current = null;
+    const userId = session?.user.id;
     setLikedState((previous) =>
       previous.key === likesKey
         ? previous
@@ -193,6 +200,26 @@ function AppStateProvider({ children }: { children: React.ReactNode }) {
     setToast((previous) =>
       previous?.actionType === "unlike" ? null : previous,
     );
+    if (!isSupabaseAuth || !userId) {
+      remoteHydratedKey.current = likesKey;
+      return;
+    }
+    void loadRemoteLikes(userId)
+      .then((tracks) => {
+        if (!live) return;
+        setLikedState({ key: likesKey, tracks });
+        remoteHydratedKey.current = likesKey;
+      })
+      .catch(() => {
+        if (!live) return;
+        remoteHydratedKey.current = likesKey;
+        triggerToast(
+          "Your saved songs could not be loaded. Showing this browser's copy.",
+        );
+      });
+    return () => {
+      live = false;
+    };
   }, [likesKey]);
 
   useEffect(() => {
@@ -201,6 +228,18 @@ function AppStateProvider({ children }: { children: React.ReactNode }) {
         triggerToast(
           "Your likes work for this visit, but browser storage is unavailable.",
         );
+      }
+      const userId = session?.user.id;
+      if (
+        isSupabaseAuth &&
+        userId &&
+        remoteHydratedKey.current === likesKey
+      ) {
+        void saveRemoteLikes(userId, likedState.tracks).catch(() => {
+          triggerToast(
+            "This like is saved in this browser, but it could not sync to your account.",
+          );
+        });
       }
     }
   }, [likedState, likesKey]);

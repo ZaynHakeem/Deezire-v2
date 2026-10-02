@@ -36,7 +36,7 @@ it("labels fields, displays validation messages, focuses the first error, and to
   await submit();
   expect(document.activeElement).toBe(password);
   expect(screen.host.querySelector("#password-error")!.textContent).toContain(
-    "8 characters",
+    "8 to 20",
   );
   await click(button(screen.host, "Show password"));
   expect(password.type).toBe("text");
@@ -54,7 +54,7 @@ it("creates a local account from the form and returns an actionable inline login
   );
   await inputValue(
     screen.host.querySelector("#auth-password")!,
-    "demo-password",
+    "Demo-pass1!",
   );
   await submit();
   expect(screen.auth.session?.user.email).toBe("new@example.test");

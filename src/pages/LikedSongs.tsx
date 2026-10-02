@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Heart, Search, Play, X } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
+import { isSupabaseAuth } from "../services/supabase";
 import { TrackList } from "../components/TrackList";
 
 export function LikedSongs() {
@@ -33,7 +34,7 @@ export function LikedSongs() {
           <p className="collection-meta" aria-live="polite">
             {authLoading
               ? "Opening your collection…"
-              : `${likedSongs.length} ${likedSongs.length === 1 ? "song" : "songs"} · ${session ? session.user.email : "Guest collection"} · This browser`}
+              : `${likedSongs.length} ${likedSongs.length === 1 ? "song" : "songs"} · ${session ? session.user.email : "Guest collection"} · ${session && isSupabaseAuth ? "Your account" : "This browser"}`}
           </p>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { safeLocalStorageSet } from "../utils/storageGuards";
 import { readLocalStorage } from "../utils/accountStorage";
+import { supabase } from "./supabase";
 
 export interface AuthUser {
   id: string;
@@ -37,11 +38,21 @@ export function validateCredentials(
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
     errors.email = "Enter a valid email, like you@example.com.";
   if (!password) errors.password = "Enter your password.";
-  else if (signup && password.length < 8)
-    errors.password = "Use at least 8 characters.";
-  else if (signup && !password.trim())
-    errors.password = "Your password cannot contain only spaces.";
+  else if (signup) errors.password = signupPasswordError(password);
   return errors;
+}
+
+function signupPasswordError(password: string) {
+  if (!password.trim()) return "Your password cannot contain only spaces.";
+  if (password.length < 8 || password.length > 20)
+    return "Use 8 to 20 characters.";
+  if (
+    !/[a-z]/.test(password) ||
+    !/[A-Z]/.test(password) ||
+    !/\d/.test(password) ||
+    !/[^A-Za-z0-9\s]/.test(password)
+  )
+    return "Include an uppercase letter, a lowercase letter, a number, and a symbol.";
 }
 
 export const LOCAL_AUTH_KEY = "deezire_demo_auth_v1";
@@ -145,6 +156,66 @@ const localProvider: AuthProvider = {
   },
 };
 
+function accountFromSupabase(user: { id: string; email?: string | null } | null) {
+  if (!user?.email) return null;
+  return { user: { id: user.id, email: user.email } };
+}
+
+function throwSupabase(error: { message: string }): never {
+  const message = error.message || "";
+  if (/already registered|already exists/i.test(message))
+    throw new AuthError(
+      "An account with this email already exists. Log in instead.",
+      "email",
+    );
+  if (/invalid login|invalid credentials/i.test(message))
+    throw new AuthError("Email or password does not match.");
+  throw new AuthError(
+    message || "We could not reach your account. Please try again.",
+  );
+}
+
+const supabaseProvider: AuthProvider = {
+  async signUp(credentials) {
+    check(credentials, true);
+    const { data, error } = await supabase!.auth.signUp({
+      email: credentials.email.trim().toLowerCase(),
+      password: credentials.password,
+      options: { emailRedirectTo: window.location.origin },
+    });
+    if (error) throwSupabase(error);
+    const session = accountFromSupabase(data.user);
+    if (!data.session || !session)
+      throw new AuthError(
+        "Check your email to confirm your account, then log in.",
+      );
+    return session;
+  },
+  async signIn(credentials) {
+    check(credentials, false);
+    const { data, error } = await supabase!.auth.signInWithPassword({
+      email: credentials.email.trim().toLowerCase(),
+      password: credentials.password,
+    });
+    if (error) throwSupabase(error);
+    const session = accountFromSupabase(data.user);
+    if (!session) throw new AuthError("Email or password does not match.");
+    return session;
+  },
+  async signOut() {
+    const { error } = await supabase!.auth.signOut();
+    if (error) throw new AuthError("Could not sign out. Please try again.");
+  },
+  async getSession() {
+    const { data, error } = await supabase!.auth.getSession();
+    if (error)
+      throw new AuthError(
+        "Your account could not be restored. You can still listen as a guest.",
+      );
+    return accountFromSupabase(data.session?.user ?? null);
+  },
+};
+
 /**
  * Backend integration seam. Set VITE_AUTH_PROVIDER=api and VITE_AUTH_API_URL
  * after implementing these JSON endpoints. The server owns secure HttpOnly
@@ -200,8 +271,12 @@ const apiProvider: AuthProvider = {
   },
   getSession: () => apiRequest("session"),
 };
-export const isDemoAuth = import.meta.env.VITE_AUTH_PROVIDER !== "api";
-const provider: AuthProvider = isDemoAuth ? localProvider : apiProvider;
+const provider: AuthProvider = supabase
+  ? supabaseProvider
+  : import.meta.env.VITE_AUTH_PROVIDER === "api"
+    ? apiProvider
+    : localProvider;
+export const isDemoAuth = provider === localProvider;
 export const signUp = (credentials: AuthCredentials) =>
   provider.signUp(credentials);
 export const signIn = (credentials: AuthCredentials) =>

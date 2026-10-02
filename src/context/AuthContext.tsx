@@ -6,6 +6,7 @@ import {
   ReactNode,
 } from "react";
 import * as auth from "../services/auth";
+import { supabase } from "../services/supabase";
 
 interface AuthState {
   session: auth.AuthSession | null;
@@ -22,6 +23,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authError, setError] = useState<string | null>(null);
   useEffect(() => {
     let live = true;
+    if (supabase) {
+      const { data } = supabase.auth.onAuthStateChange((_event, next) => {
+        if (!live) return;
+        const user = next?.user;
+        setSession(
+          user?.email ? { user: { id: user.id, email: user.email } } : null,
+        );
+        setError(null);
+        setLoading(false);
+      });
+      return () => {
+        live = false;
+        data.subscription.unsubscribe();
+      };
+    }
     const restore = () =>
       auth
         .getSession()

@@ -15,6 +15,7 @@ import { useApp } from "../context/AppContext";
 import { useConfirm } from "../context/ConfirmContext";
 import { MOODS } from "../config/moodPresentation";
 import { MoodMark } from "../components/MoodMark";
+import { isDemoAuth } from "../services/auth";
 
 export function About() {
   const { resetSession, searchResult, lastQuery, triggerToast } = useApp();
@@ -107,8 +108,9 @@ export function About() {
           </summary>
           <p>
             No. Discover music, play previews, and like songs as a guest. Guest
-            likes stay in this browser. An account has its own separate
-            collection; guest likes are not moved automatically.
+            likes stay in this browser. A signed-in collection is stored with
+            that account{isDemoAuth ? " in this browser" : ""}, and guest likes
+            are not moved automatically.
           </p>
         </details>
         <details>
@@ -141,17 +143,22 @@ export function About() {
             <ChevronDown size={19} />
           </summary>
           <p>
-            Your recent mood text, mix, and liked songs are saved in this
-            browser. Emotion analysis happens on your device. Music discovery
+            Your recent mood text and mix are saved in this browser.{" "}
+            {isDemoAuth
+              ? "Liked songs are saved in this browser too."
+              : "Liked songs for a signed-in account are stored with that account. Guest likes stay in this browser."}{" "}
+            Emotion analysis happens on your device. Music discovery
             sends search terms to Deezer; unrecognized words from your input may
             be included. Album images and audio also come from Deezer.
           </p>
-          <p>
-            The current account feature is a local demo: it stores an email and
-            a made-up password in this browser, without production security or
-            verification. Use no real password. No email is sent, and accounts
-            and likes do not sync between devices.
-          </p>
+          {isDemoAuth && (
+            <p>
+              The current account feature is a local demo: it stores an email and
+              a made-up password in this browser, without production security or
+              verification. Use no real password. No email is sent, and accounts
+              and likes do not sync between devices.
+            </p>
+          )}
         </details>
       </section>
       <section className="listening-settings">

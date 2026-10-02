@@ -5,6 +5,7 @@ import { CustomLogo } from "./CustomLogo";
 import { useAuth } from "../context/AuthContext";
 import { useApp } from "../context/AppContext";
 import { useConfirm } from "../context/ConfirmContext";
+import { isSupabaseAuth } from "../services/supabase";
 
 const items = [
   { to: "/", label: "Discover", icon: Compass },
@@ -23,7 +24,9 @@ export function Navigation() {
       !(await confirm({
         title: "Sign out for now?",
         description:
-          "Your liked songs will stay with this account in this browser. You can keep listening as a guest.",
+          isSupabaseAuth
+            ? "Your liked songs stay with this account. You can keep listening as a guest."
+            : "Your liked songs will stay with this account in this browser. You can keep listening as a guest.",
         confirmLabel: "Sign out",
         cancelLabel: "Stay signed in",
       }))

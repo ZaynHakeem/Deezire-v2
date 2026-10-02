@@ -19,7 +19,7 @@ it("preserves legacy guest likes across two accounts, sign-out, reload, and undo
   await act(async () =>
     screen!.auth.signUp({
       email: "first@example.test",
-      password: "demo-password",
+      password: "Demo-pass1!",
     }),
   );
   const firstId = screen.auth.session!.user.id;
@@ -35,7 +35,7 @@ it("preserves legacy guest likes across two accounts, sign-out, reload, and undo
   await act(async () =>
     screen!.auth.signUp({
       email: "second@example.test",
-      password: "demo-password",
+      password: "Demo-pass1!",
     }),
   );
   expect(screen.app.likedSongs).toEqual([]);

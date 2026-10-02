@@ -158,8 +158,9 @@ export function Auth({ mode }: { mode: "login" | "signup" }) {
                   autoComplete={signup ? "new-password" : "current-password"}
                   required
                   minLength={signup ? 8 : undefined}
+                  maxLength={signup ? 20 : undefined}
                   placeholder={
-                    signup ? "At least 8 characters" : "Your password"
+                    signup ? "8–20 characters" : "Your password"
                   }
                   value={password}
                   onChange={(e) => {
@@ -188,7 +189,7 @@ export function Auth({ mode }: { mode: "login" | "signup" }) {
               >
                 {errors.password ||
                   (signup
-                    ? "8 or more characters. Use a password only for this demo."
+                    ? "8–20 characters, with an uppercase letter, a lowercase letter, a number, and a symbol."
                     : "Use the password you created for this account.")}
               </p>
             </div>
